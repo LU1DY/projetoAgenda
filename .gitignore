@@ -1,0 +1,11 @@
+ 
+# Ignorar arquivos de configuração do ambiente virtual
+venv/
+__pycache__/
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar arquivos de compilação
+*.pyc
+*.pyo
