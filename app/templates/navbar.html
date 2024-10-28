@@ -1,0 +1,21 @@
+<header class="container-header">
+  <nav id="navation">
+    <div class="logoHeader"></div>
+    <ul>
+      <li><a id="homes" href="{{url_for('homepage')}}">Ínicio</a></li>
+      {% if current_user.is_authenticated %}
+      <li><a href="{{url_for('agenda')}}">Agenda</a></li>
+      {% else %} {% endif %}
+    </ul>
+  </nav>
+  <div id="perfil">
+    <ul>
+      {% if current_user.is_authenticated %}
+      <li id="logout">Logout</li>
+      {% else %}
+      <li><a href="{{url_for('login')}}">Login</a></li>
+      <li><a href="{{url_for('criarconta')}}">Criar conta</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</header>
