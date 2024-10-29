@@ -1,10 +1,11 @@
-from app import app, database, bcrypt
+from app import app, database, bcrypt, admin
 from flask import render_template, url_for, request, redirect, flash, jsonify, session
 from flask_login import login_user, logout_user, current_user, login_required
 from app.forms import FormLogin, FormCriarConta
 from app.models import Usuario
 from werkzeug.utils import secure_filename
 import os
+
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -14,6 +15,7 @@ def login():
     if form_login.validate_on_submit():
         usuario = Usuario.query.filter_by(email=form_login.email.data).first()
         if usuario:
+            # Use bcrypt para verificar a senha
             if bcrypt.check_password_hash(usuario.senha, form_login.senha.data):
                 login_user(usuario)
                 par_next = request.args.get('next')
@@ -37,13 +39,11 @@ def criarconta():
         database.session.add(usuario)
         database.session.commit()
         login_user(usuario)
-
         return redirect(url_for('homepage'))
     else:
         flash('Algo deu errado, verifique suas informações e tente novamente.')
 
     return render_template("criarconta.html", form_criar_conta=form_criar_conta, visualizarSenhaCriarConta=visualizarSenhaCriarConta)
-
 
 
 @app.route('/logout')
@@ -55,8 +55,29 @@ def logout():
 
 @app.route("/")
 def homepage():
-    return render_template("homepage.html")
+    users = Usuario.query.all()  # Busca todos os usuários no banco de dados
+    is_admin = current_user.is_authenticated and current_user.is_admin  # Verifique se o usuário está autenticado
+    return render_template("homepage.html", admin=is_admin, users=users)
 
 @app.route('/agenda')
 def agenda():
     return render_template('agenda.html')
+
+# Rota para promover um usuário a administrador (acessível apenas por outros administradores)
+@app.route('/promote', methods=['POST'])
+@login_required
+def promote():
+    if not current_user.is_admin:
+        flash('Acesso negado.')
+        return redirect(url_for('homepage'))
+
+    user_id = request.form.get('user_id')  # Obtenha o ID do usuário do formulário
+    user = Usuario.query.get(user_id)
+    if user:
+        user.is_admin = True  # Promova o usuário a administrador
+        database.session.commit()
+        flash(f'O usuário {user.username} foi promovido a administrador.')
+    else:
+        flash('Usuário não encontrado.')
+    return redirect(url_for('homepage'))
+
