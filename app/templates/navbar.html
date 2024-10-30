@@ -2,10 +2,14 @@
   <nav id="navation">
     <div class="logoHeader"></div>
     <ul>
-      <li><a id="homes" href="{{url_for('homepage')}}">Ínicio</a></li>
       {% if current_user.is_authenticated %}
-      <li><a href="{{url_for('agenda')}}">Agenda</a></li>
-      {% else %} {% endif %}
+          {% if current_user.is_admin %}
+              <li><a href="{{url_for('admin')}}">Admin</a></li>
+              <li><a href="{{url_for('agenda')}}">Agenda</a></li>
+          {%else%}
+              <li><a href="{{url_for('homepage')}}">Início</a></li>
+          {%endif%}
+     {% endif %}
     </ul>
   </nav>
   <div id="perfil">

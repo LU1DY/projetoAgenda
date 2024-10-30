@@ -53,6 +53,12 @@ def logout():
     return redirect(url_for('homepage'))
 
 
+@app.route('/admin')
+@login_required
+def admin():
+    return
+
+
 @app.route("/")
 def homepage():
     users = Usuario.query.all()  # Busca todos os usuários no banco de dados
