@@ -18,13 +18,11 @@
     <form method="POST" action="">
       {{ form_login.hidden_tag() }}
       <div class="divInput">
-        {{ form_login.email(type="email", id="email", placeholder="Seu
-        e-mail...") }}
+        {{ form_login.email(type="email", id="email", placeholder="Seu e-mail...") }}
         <div class="errorJS" id="errorJSEmail"></div>
       </div>
       <div class="divInput">
-        {{ form_login.senha(type="password", id="password", placeholder="Sua
-        senha...") }}
+        {{ form_login.senha(type="password", id="password", placeholder="Sua senha...") }}
         <div class="errorJS"></div>
         {% with messages = get_flashed_messages(with_categories=True) %} {% if
         messages %} {% for category, message in messages %}
