@@ -33,9 +33,9 @@ login_manager.login_view = 'login'  # Define a rota de login
 login_manager.login_message_category = 'info'  # Categoria das mensagens de alerta
 
 
-from app.models import Usuario
-
-with app.app_context():
-    database.create_all()  # Isso cria as tabelas novamente
+from app.models import Usuario, Eventos, Produtos
+# cria as tabelas
+# with app.app_context():
+    # database.create_all()  # Isso cria as tabelas novamente
 
 
