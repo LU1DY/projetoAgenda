@@ -26,8 +26,7 @@
           <div class="errorJS"></div>
         </div>
         <div class="divInput">
-          {{ form_criar_conta.email(type="email", id="email", placeholder="Seu
-          e-mail...") }}
+          {{ form_criar_conta.email(type="email", id="email", placeholder="Seu e-mail...") }}
           <div class="errorJS"></div>
           {% for error in form_criar_conta.email.errors %}
           <div id="errorFlask">
@@ -118,28 +117,9 @@
           {{
           form_criar_conta.btn_submit_criar_conta(id="btn_submit_criar_conta")
           }}
-          <a href="">Esqueceu sua senha?</a>
         </div>
       </div>
     </form>
-    <div class="other">
-      <div class="continue">
-        <hr />
-        <p>ou continue com</p>
-        <hr />
-      </div>
-      <ul>
-        <li>
-          <a href=""><i class="bx bxl-google"></i></a>
-        </li>
-        <li>
-          <a href=""><i class="bx bxl-apple"></i></a>
-        </li>
-        <li>
-          <a href=""><i class="bx bxl-facebook"></i></a>
-        </li>
-      </ul>
-    </div>
     <div class="createCount">
       <h4>
         Já possui conta?

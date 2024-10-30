@@ -24,6 +24,7 @@ bcrypt = Bcrypt(app)
 from app import routes
 login_manager = LoginManager(app)
 
+from app.models import Usuario
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -33,9 +34,7 @@ login_manager.login_view = 'login'  # Define a rota de login
 login_manager.login_message_category = 'info'  # Categoria das mensagens de alerta
 
 
-from app.models import Usuario
-
+from app.models import Usuario, Evento, Produtos
+# cria as tabelas
 with app.app_context():
     database.create_all()  # Isso cria as tabelas novamente
-
-

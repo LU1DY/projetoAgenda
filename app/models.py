@@ -15,3 +15,9 @@ class Produtos(database.Model):
     descriptionProduct = database.Column(database.String, nullable=False)
     price = database.Column(database.Integer, nullable=False)
     
+
+class Evento(database.Model):
+    id = database.Column(database.Integer, primary_key=True)
+    titulo = database.Column(database.String, nullable=False)
+    data_inicio = database.Column(database.Date, nullable=False)
+    data_fim = database.Column(database.Date, nullable=True)

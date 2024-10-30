@@ -15,7 +15,7 @@ def login():
     if form_login.validate_on_submit():
         usuario = Usuario.query.filter_by(email=form_login.email.data).first()
         if usuario:
-            # Use bcrypt para verificar a senha
+            # Usa bcrypt para verificar a senha
             if bcrypt.check_password_hash(usuario.senha, form_login.senha.data):
                 login_user(usuario)
                 par_next = request.args.get('next')
@@ -56,7 +56,7 @@ def logout():
 @app.route("/")
 def homepage():
     users = Usuario.query.all()  # Busca todos os usuários no banco de dados
-    is_admin = current_user.is_authenticated and current_user.is_admin  # Verifique se o usuário está autenticado
+    is_admin = current_user.is_authenticated and current_user.is_admin  # Verifica se o usuário está autenticado e se é o ADM
     return render_template("homepage.html", admin=is_admin, users=users)
 
 @app.route('/agenda')
@@ -80,4 +80,3 @@ def promote():
     else:
         flash('Usuário não encontrado.')
     return redirect(url_for('homepage'))
-

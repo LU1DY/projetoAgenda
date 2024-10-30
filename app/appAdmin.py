@@ -1,5 +1,5 @@
 from app import app, admin, database
-from app.models import Usuario, Produtos
+from app.models import Usuario, Produtos, Evento
 from flask_admin.contrib.sqla import ModelView
 
 
@@ -16,5 +16,6 @@ def init_app(app):
     admin.init_app(app)
     admin.add_view(ModelView(Usuario, database.session))
     admin.add_view(ModelView(Produtos, database.session))
+    admin.add_view(ModelView(Evento, database.session))
 
 

@@ -18,13 +18,11 @@
     <form method="POST" action="">
       {{ form_login.hidden_tag() }}
       <div class="divInput">
-        {{ form_login.email(type="email", id="email", placeholder="Seu
-        e-mail...") }}
+        {{ form_login.email(type="email", id="email", placeholder="Seu e-mail...") }}
         <div class="errorJS" id="errorJSEmail"></div>
       </div>
       <div class="divInput">
-        {{ form_login.senha(type="password", id="password", placeholder="Sua
-        senha...") }}
+        {{ form_login.senha(type="password", id="password", placeholder="Sua senha...") }}
         <div class="errorJS"></div>
         {% with messages = get_flashed_messages(with_categories=True) %} {% if
         messages %} {% for category, message in messages %}
@@ -75,29 +73,9 @@
       <div class="submitResquest">
         <div class="requestPassword">
           {{ form_login.btn_submit_login(id="btn_submit_login") }}
-          <a href="">Esqueceu sua senha?</a>
         </div>
       </div>
     </form>
-
-    <div class="other">
-      <div class="continue">
-        <hr />
-        <p>ou continue com</p>
-        <hr />
-      </div>
-      <ul>
-        <li>
-          <a href=""><i class="bx bxl-google"></i></a>
-        </li>
-        <li>
-          <a href=""><i class="bx bxl-apple"></i></a>
-        </li>
-        <li>
-          <a href=""><i class="bx bxl-facebook"></i></a>
-        </li>
-      </ul>
-    </div>
 
     <div class="createCount">
       <h4>
