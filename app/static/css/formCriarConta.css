@@ -44,7 +44,7 @@ main {
       }
       & p {
         font-size: 1.6rem;
-        color: #0c0c0c;
+        color: #fff;
         font-weight: 500;
         margin-bottom: 3rem;
         text-align: justify;
@@ -103,7 +103,7 @@ main {
           padding: 1rem;
           font-size: 1.6rem;
           outline: none;
-          color: #0c0c0c;
+          color: #fff;
           background-color: transparent;
         }
         & #togglePassword {
@@ -113,6 +113,8 @@ main {
           margin-right: 1rem;
           & svg {
             cursor: pointer;
+            width: 4rem;
+            height: 4rem;
           }
         }
         & #togglePasswordConfirm {
@@ -123,6 +125,8 @@ main {
 
           & svg {
             cursor: pointer;
+            width: 4rem;
+            height: 4rem;
           }
         }
 
@@ -145,36 +149,41 @@ main {
       & .submitResquest {
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         width: 100%;
+        margin-top: 3rem;
         & #btn_submit_login,
         & #btn_submit_criar_conta {
           border: none;
-          color: white;
-          background-color: #0c0c0c;
+          color: #0c0c0c;
+          background-color: #fff;
+          border: 2px solid #fff;
           font-size: 2rem;
           font-weight: 900;
           text-transform: uppercase;
           font-family: "Montserrat", sans-serif;
           padding: 1rem 2rem;
           border-radius: 3rem;
-          margin-top: 2rem;
-          margin-bottom: 4rem;
           width: max-content;
+          cursor: pointer;
+          transition: 300ms ease;
+          &:hover {
+            background-color: #0c0c0c;
+            color: #fff;
+          }
         }
-      }
-    }
-    & .createCount {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 3rem;
-      align-self: center;
-      & h4 {
-        font-size: 1.6rem;
-        font-weight: 600;
-        & a {
-          color: #62875a !important;
+        & .createCount {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          align-self: center;
+          & h4 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            & a {
+              color: #62875a !important;
+            }
+          }
         }
       }
     }

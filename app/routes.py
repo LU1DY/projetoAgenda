@@ -1,11 +1,11 @@
 from app import app, database, bcrypt, admin
 from flask import render_template, url_for, request, redirect, flash, jsonify, session
 from flask_login import login_user, logout_user, current_user, login_required
-from app.forms import FormLogin, FormCriarConta
-from app.models import Usuario
+from app.forms import FormLogin, FormCriarConta, FormSolicitacao, FormConsulta
+from app.models import Usuario, Consulta,Solicitacao
 from werkzeug.utils import secure_filename
 import os
-
+from datetime import datetime
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -15,7 +15,6 @@ def login():
     if form_login.validate_on_submit():
         usuario = Usuario.query.filter_by(email=form_login.email.data).first()
         if usuario:
-            # Usa bcrypt para verificar a senha
             if bcrypt.check_password_hash(usuario.senha, form_login.senha.data):
                 login_user(usuario)
                 par_next = request.args.get('next')
@@ -40,9 +39,6 @@ def criarconta():
         database.session.commit()
         login_user(usuario)
         return redirect(url_for('homepage'))
-    else:
-        flash('Algo deu errado, verifique suas informações e tente novamente.')
-
     return render_template("criarconta.html", form_criar_conta=form_criar_conta, visualizarSenhaCriarConta=visualizarSenhaCriarConta)
 
 
@@ -54,20 +50,107 @@ def logout():
 
 
 @app.route('/admin')
-@login_required
 def admin():
-    return
+    return redirect(url_for('admin.index'))
 
-
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def homepage():
-    users = Usuario.query.all()  # Busca todos os usuários no banco de dados
-    is_admin = current_user.is_authenticated and current_user.is_admin  # Verifica se o usuário está autenticado e se é o ADM
-    return render_template("homepage.html", admin=is_admin, users=users)
+    users = Usuario.query.all()
+    is_admin = current_user.is_authenticated and getattr(current_user, 'is_admin', False)
+    solicitacoes = Solicitacao.query.all()
+    consultas = Consulta.query.all()
+    datas_agendadas = [consulta.data for consulta in consultas]
+    form_solicitacao = FormSolicitacao()
+    form_consulta = FormConsulta()
+
+    form_consulta.username.choices = [(usuario.id, usuario.username) for usuario in users]
+
+    if form_solicitacao.validate_on_submit():
+        if form_solicitacao.data.data in datas_agendadas:
+            flash('Data já agendada, escolha outra!', 'warning')
+        else:
+            solicitacao = Solicitacao(
+                servico=form_solicitacao.servico.data,
+                motivo=form_solicitacao.motivo.data,
+                data=form_solicitacao.data.data,
+                usuario_id=current_user.id,
+                user_name=current_user.username
+            )
+            database.session.add(solicitacao)
+            database.session.commit()
+            flash('Solicitação enviada com sucesso!', 'success')
+        return redirect(url_for('homepage'))
+
+    if form_consulta.validate_on_submit():
+        consulta = Consulta(
+            usuario_id=form_consulta.username.data,
+            servico=form_consulta.servico.data,
+            data=form_consulta.data.data,
+            user_name=Usuario.query.get(form_consulta.username.data).username
+        )
+        database.session.add(consulta)
+        database.session.commit()
+        flash('Consulta agendada com sucesso!', 'success')
+        return redirect(url_for('homepage'))
+
+    return render_template(
+        "homepage.html", 
+        admin=is_admin, 
+        users=users, 
+        form_solicitacao=form_solicitacao, 
+        form_consulta=form_consulta, 
+        datas_agendadas=datas_agendadas, 
+        solicitacoes=solicitacoes, 
+        consultas=consultas
+    )
+
+
+@app.route('/cancelarConsulta/<int:id>', methods=['POST'])
+def cancelarConsulta(id):
+    consulta = Consulta.query.get_or_404(id)
+    database.session.delete(consulta)
+    database.session.commit()
+    flash('Consulta cancelada.', 'info')
+    return redirect(url_for('homepage'))
+
+
+@app.route('/cancelarSolicitacao/<int:id>', methods=['POST'])
+def cancelarSolicitacao(id):
+    solicitacao = Solicitacao.query.get_or_404(id)
+    database.session.delete(solicitacao)
+    database.session.commit()
+    flash('Consulta cancelada.', 'info')
+    return redirect(url_for('homepage'))
+
 
 @app.route('/agenda')
 def agenda():
     return render_template('agenda.html')
+
+@app.route('/confirmar/<int:id>', methods=['POST'])
+def confirmar(id):
+    solicitacao = Solicitacao.query.get_or_404(id)
+    consulta = Consulta(
+        servico=solicitacao.servico,
+        motivo=solicitacao.motivo,
+        data=solicitacao.data,
+        user_name=solicitacao.user_name,
+        usuario_id=solicitacao.usuario_id,
+    )
+    database.session.add(consulta)
+    database.session.delete(solicitacao)
+    database.session.commit()
+    flash('Solicitação confirmada!', 'success')
+    return redirect(url_for('homepage'))
+
+@app.route('/cancelar/<int:id>', methods=['POST'])
+def cancelar(id):
+    solicitacao = Solicitacao.query.get_or_404(id)
+    database.session.delete(solicitacao)
+    database.session.commit()
+    flash('Solicitação cancelada.', 'info')
+    return redirect(url_for('homepage'))
+
 
 # Rota para promover um usuário a administrador (acessível apenas por outros administradores)
 @app.route('/promote', methods=['POST'])
@@ -77,12 +160,14 @@ def promote():
         flash('Acesso negado.')
         return redirect(url_for('homepage'))
 
-    user_id = request.form.get('user_id')  # Obtenha o ID do usuário do formulário
+    user_id = request.form.get('user_id')  # Obtem o ID do usuário
     user = Usuario.query.get(user_id)
     if user:
-        user.is_admin = True  # Promova o usuário a administrador
+        user.is_admin = True  # Promove o usuário a administrador
         database.session.commit()
         flash(f'O usuário {user.username} foi promovido a administrador.')
     else:
         flash('Usuário não encontrado.')
     return redirect(url_for('homepage'))
+
+

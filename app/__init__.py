@@ -28,11 +28,11 @@ login_manager = LoginManager(app)
 def load_user(user_id):
     return Usuario.query.get(int(user_id))
 
-login_manager.login_view = 'login'  # Define a rota de login
-login_manager.login_message_category = 'info'  # Categoria das mensagens de alerta
+login_manager.login_view = 'login'  
+login_manager.login_message_category = 'info'  
 
 
-from app.models import Usuario, Evento, Produtos
+from app.models import Usuario, Consulta
 # cria as tabelas
 with app.app_context():
-    database.create_all()  # Isso cria as tabelas novamente
+    database.create_all() 

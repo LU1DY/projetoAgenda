@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, FloatField, IntegerField, SubmitField, FileField, TextAreaField
+from wtforms import StringField, PasswordField, FloatField, IntegerField, SubmitField, FileField, TextAreaField, DateTimeLocalField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 
 from app.models import Usuario
@@ -24,8 +24,16 @@ class FormLogin(FlaskForm):
     senha = PasswordField('Senha', validators=[DataRequired(), Length(8, 20)])
     btn_submit_login = SubmitField('Login')
 
-    # def validade_password(self, senha):
-    #     usuario = Usuario.query.filter_by(senha=senha.data).first()
-    #     if
+
+class FormSolicitacao(FlaskForm):
+    servico = StringField('Nome', validators=[DataRequired()])
+    motivo = TextAreaField('Email', validators=[DataRequired()])
+    data = DateTimeLocalField('Data da Consulta', validators=[DataRequired()], format='%Y-%m-%dT%H:%M')
+    submit = SubmitField('Enviar')
 
 
+class FormConsulta(FlaskForm):
+    username = SelectField('Selecione um usuário:', validators=[DataRequired()], choices=[])
+    servico = StringField('Selecione um serviço: ', validators=[DataRequired()])
+    data = DateTimeLocalField('Selecione uma data: ', validators=[DataRequired()])
+    submit = SubmitField('Agendar')
