@@ -55,54 +55,69 @@ def admin():
 
 @app.route("/", methods=['GET', 'POST'])
 def homepage():
-    users = Usuario.query.all()
-    is_admin = current_user.is_authenticated and getattr(current_user, 'is_admin', False)
-    solicitacoes = Solicitacao.query.all()
-    consultas = Consulta.query.all()
-    datas_agendadas = [consulta.data for consulta in consultas]
-    form_solicitacao = FormSolicitacao()
-    form_consulta = FormConsulta()
+    
+    if current_user.is_authenticated:
 
-    form_consulta.username.choices = [(usuario.id, usuario.username) for usuario in users]
-
-    if form_solicitacao.validate_on_submit():
-        if form_solicitacao.data.data in datas_agendadas:
-            flash('Data já agendada, escolha outra!', 'warning')
-        else:
-            solicitacao = Solicitacao(
-                servico=form_solicitacao.servico.data,
-                motivo=form_solicitacao.motivo.data,
-                data=form_solicitacao.data.data,
-                usuario_id=current_user.id,
-                user_name=current_user.username
-            )
-            database.session.add(solicitacao)
-            database.session.commit()
-            flash('Solicitação enviada com sucesso!', 'success')
-        return redirect(url_for('homepage'))
-
-    if form_consulta.validate_on_submit():
-        consulta = Consulta(
-            usuario_id=form_consulta.username.data,
-            servico=form_consulta.servico.data,
-            data=form_consulta.data.data,
-            user_name=Usuario.query.get(form_consulta.username.data).username
-        )
-        database.session.add(consulta)
+        agora = datetime.now()
+        consultas_expiradas = Consulta.query.filter(Consulta.data <= agora).all()
+        solicitacoes_experidas = Solicitacao.query.filter(Solicitacao.data <= agora).all()
+        for consulta in consultas_expiradas:
+            database.session.delete(consulta)
         database.session.commit()
-        flash('Consulta agendada com sucesso!', 'success')
-        return redirect(url_for('homepage'))
+        for solicitacao in solicitacoes_experidas:
+            database.session.delete(solicitacao)
+        database.session.commit()
+        users = Usuario.query.all()
+        is_admin = current_user.is_authenticated and getattr(current_user, 'is_admin', False)
+        solicitacoesPorUsuario = Solicitacao.query.filter_by(usuario_id=current_user.id).all()
+        consultasPorUsuario = Consulta.query.filter_by(usuario_id=current_user.id).all()
+        consultas = Consulta.query.all()
+        solicitacoes = Solicitacao.query.all()
+        datas_agendadas = [consulta.data for consulta in consultas]
+        form_solicitacao = FormSolicitacao()
+        form_consulta = FormConsulta()
+        form_consulta.username.choices = [(usuario.id, usuario.username) for usuario in users]
+        if form_solicitacao.validate_on_submit():
+            if form_solicitacao.data.data in datas_agendadas:
+                flash('Data já agendada, escolha outra!', 'warning')
+            else:
+                solicitacao = Solicitacao(
+                    servico=form_solicitacao.servico.data,
+                    motivo=form_solicitacao.motivo.data,
+                    data=form_solicitacao.data.data,
+                    usuario_id=current_user.id,
+                    user_name=current_user.username
+                )
+                database.session.add(solicitacao)
+                database.session.commit()
+                flash('Solicitação enviada com sucesso!', 'success')
+            return redirect(url_for('homepage'))
+        if form_consulta.validate_on_submit():
+            consulta = Consulta(
+                usuario_id=form_consulta.username.data,
+                servico=form_consulta.servico.data,
+                data=form_consulta.data.data,
+                user_name=Usuario.query.get(form_consulta.username.data).username
+            )
+            database.session.add(consulta)
+            database.session.commit()
+            flash('Consulta agendada com sucesso!', 'success')
+            return redirect(url_for('homepage'))
 
-    return render_template(
-        "homepage.html", 
-        admin=is_admin, 
-        users=users, 
-        form_solicitacao=form_solicitacao, 
-        form_consulta=form_consulta, 
-        datas_agendadas=datas_agendadas, 
-        solicitacoes=solicitacoes, 
-        consultas=consultas
-    )
+        return render_template(
+            "homepage.html", 
+            admin=is_admin, 
+            users=users, 
+            form_solicitacao=form_solicitacao, 
+            form_consulta=form_consulta, 
+            datas_agendadas=datas_agendadas, 
+            solicitacoesPorUsuario=solicitacoesPorUsuario,
+            solicitacoes=solicitacoes, 
+            consultasPorUsuario=consultasPorUsuario, 
+            consultas=consultas
+        )
+    else:
+        return render_template('homepage.html')
 
 
 @app.route('/cancelarConsulta/<int:id>', methods=['POST'])
