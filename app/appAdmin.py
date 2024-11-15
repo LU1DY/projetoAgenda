@@ -53,10 +53,6 @@ class HomeView(BaseView):
 
 
 def init_app(app):
-    app.config['SECRET_KEY'] = 'K9#hS8vJ2xF!mQ3u@L7^tR6gB$eY5kP1jH8*zU4w9F3o'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['FLASK_ADMIN_TEMPLATE_MODE'] = 'bootstrap4'
-
     admin.init_app(app)
     admin.add_view(ModelView(Usuario, database.session))
     admin.add_view(ModelView(Solicitacao, database.session))

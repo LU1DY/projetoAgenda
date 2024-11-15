@@ -23,7 +23,6 @@ def login():
                 flash('Senha incorreta!')
         else:
             flash(f'Nenhuma conta associada ao e-mail: {form_login.email.data}', 'alert-danger')
-
     return render_template("login.html", form_login=form_login, visualizarSenhaLogin=visualizarSenhaLogin)
 
 
@@ -55,9 +54,7 @@ def admin():
 
 @app.route("/", methods=['GET', 'POST'])
 def homepage():
-    
     if current_user.is_authenticated:
-
         agora = datetime.now()
         consultas_expiradas = Consulta.query.filter(Consulta.data <= agora).all()
         solicitacoes_experidas = Solicitacao.query.filter(Solicitacao.data <= agora).all()
