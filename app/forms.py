@@ -1,11 +1,10 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, FloatField, IntegerField, SubmitField, FileField, TextAreaField, DateTimeLocalField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, DateTimeLocalField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 
 from app.models import Usuario
 
-
+# formulário de criar conta
 class FormCriarConta(FlaskForm):
     username = StringField('Nome de usuário', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
