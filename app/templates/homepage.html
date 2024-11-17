@@ -1,451 +1,495 @@
-{% extends 'base.html' %} {%block head%}
+{% extends 'base.html' %}
+<!--  extends 'base.html'  puxa todo o documento html da base.html, assim não precisamos ficar criando todo o documento de uma página para cada página que desejamos criar  -->
+
+{%block head%}
 <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/index.global.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.15/index.global.min.js"></script>
-{%endblock%} {%block body%} {% if current_user.is_authenticated %} {%include
-'navbar.html'%}
+{%endblock%} 
+{%block body%} 
+<!-- verifica se o usuário esta logado -->
+{% if current_user.is_authenticated %}
+<!-- se sim, retorna a barra de navegação para usuários logados -->
+  {%include 'navbar.html'%}
 
-<main class="home">
-  {% if admin %}
+  <main class="home">
+    <!-- verifica se o usuário é um ADM, se sim retorna funções de adm, se não retorna funções de usuários comuns -->
+    {% if admin %}
 
-  <div class="divColumn">
-    <form method="POST" action="{{ url_for('promote') }}" id="promote-form">
-      <h2 for="user_id">Promover a Administrador:</h2>
-      <select name="user_id" id="user_id">
-        {% for user in users %}
-        <option value="{{ user.id }}">{{ user.username }}</option>
-        {% endfor %}
-      </select>
-      <button type="submit">Promover a Administrador</button>
-    </form>
-    <form method="post" action="{{url_for('homepage')}}" class="formConsulta">
-      <h2>Agendar uma consulta</h2>
-      {{ form_consulta.hidden_tag() }}
-      <div class="divInput">
-          {{ form_consulta.username(class="form-control select2") }}
-      </div>
-      <div class="divInput">
-          {{ form_consulta.servico(class="form-control", placeholder="Informe o serviço...") }}
-      </div>
-      <div class="divInput">
-          {{ form_consulta.data(class="form-control", placeholder="Clique para adicionar uma data...") }}
-      </div>
-      {{form_consulta.submit(type="submit", id="btnSubmitConsulta")}}
-  </form>
-  
-  </div>
+      <div class="divColumn">
+        <!-- esse form é o formulário que promove usuários para ADM -->
+        <form method="POST" action="{{ url_for('promote') }}" id="promote-form">
+          <h2 for="user_id">Promover a Administrador:</h2>
+          <select name="user_id" id="user_id">
+            <!-- esse for percorre todos os usuários adicionando uma opção para cada usuário -->
+            {% for user in users %}
+            <option value="{{ user.id }}">{{ user.username }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit">Promover a Administrador</button>
+        </form>
+        <form method="post" action="{{url_for('homepage')}}" class="formConsulta">
+          <h2>Agendar uma consulta</h2>
+                <!-- adiciona a tag contra ataque CSRF e outras formas de segurança -->
 
-  <div class="divColumn2">
-    <div class="suasConsultas">
-      <div class="selectCoSo">
-        <div class="title">
-          <h2 id="consultaTitle">Suas Consultas</h2>
-          <h2 id="solicitacaoTitle">Suas Solicitações</h2>
-        </div>
-        <select
-          name="consultasSolicitacoesSelect"
-          id="consultasSolicitacoesSelect"
-          onchange="alternarConteudo()"
-        >
-          <option value="consultas" selected>Consultas</option>
-          <option value="solicitacoes">Solicitações</option>
-        </select>
+          {{ form_consulta.hidden_tag() }}
+          <div class="divInput">
+              <!-- input nome, também retorna uma opção para cada usuário, mas com javascript-->
+              {{ form_consulta.username(class="form-control select2") }}
+          </div>
+          <div class="divInput">
+              <!-- input de serviço desejado -->
+              {{ form_consulta.servico(class="form-control", placeholder="Informe o serviço...") }}
+          </div>
+          <div class="divInput">
+              <!-- input de data -->
+              {{ form_consulta.data(class="form-control", placeholder="Clique para adicionar uma data...") }}
+          </div>
+          <!-- botão de enviar -->
+          {{form_consulta.submit(type="submit", id="btnSubmitConsulta")}}
+      </form>
+      
       </div>
 
-      <div class="listEvents">
-        <ul id="solicitacoes" class="listaPedidos">
-          {% for solicitacao in solicitacoes %}
-          <li>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="40px"
-              viewBox="0 -960 960 960"
-              width="40px"
-              fill="#fff"
-            >
-              <path
-                d="M680-875q66 0 113 47t47 113q0 11-1.5 29.5T834-643l-55 403q-5 40-35.5 63T677-154q-21.67 0-41.5-9.33-19.83-9.34-33.5-28.67L495-348q-2-3.33-6.5-5.17Q484-355 479-355q-2.67 0-16 9L359-195q-14 20.67-34.83 30.83Q303.33-154 281-154q-36 0-66-23.17-30-23.16-35-63.83l-54-402q-3-24-4.5-42.5T120-715q0-66 47-113t113-47q36 0 57.5 9.5T379-845q20 11 42.5 20.5T480-815q36 0 58.5-9.5T581-845q20-11 42-20.5t57-9.5Z"
-              />
-            </svg>
-            <div class="motivoIcon">
-              <i class="bx bx-info-circle"></i>
-              <div class="motivoHover">
-                <h2>Motivo:</h2>
-                <span>{{solicitacao.motivo}}</span>
-              </div>
-            </div>
-            <div class="solicitacaoDetails">
-              <p>
-                Solicitação de {{ solicitacao.user_name }}: {{
-                solicitacao.data.strftime('%m/%d %H:%M') }}
-              </p>
-              <form
-                action="{{ url_for('confirmar', id=solicitacao.id) }}"
-                method="POST"
-                style="display: inline"
-              >
-                <button type="submit">Confirmar</button>
-              </form>
-              <form
-                action="{{ url_for('cancelar', id=solicitacao.id) }}"
-                method="POST"
-                style="display: inline"
-              >
-                <button type="submit">Cancelar</button>
-              </form>
-            </div>
-          </li>
-          <script>
-            function alternarConteudo() {
-              const select = document.getElementById(
-                "consultasSolicitacoesSelect"
-              );
-              const valorSelecionado = select.value;
-
-              // Esconder todas as listas
-              document.getElementById("consultas").style.display = "none";
-              document.getElementById("solicitacoes").style.display = "none";
-
-              // Esconder ambos os títulos
-              const consultaTitle = document.getElementById("consultaTitle");
-              const solicitacaoTitle =
-                document.getElementById("solicitacaoTitle");
-              consultaTitle.style.display = "none";
-              solicitacaoTitle.style.display = "none";
-
-              // Mostrar o título e a lista correspondente
-              if (valorSelecionado === "consultas") {
-                consultaTitle.style.display = "flex";
-              } else if (valorSelecionado === "solicitacoes") {
-                solicitacaoTitle.style.display = "flex";
-              }
-
-              // Mostrar a lista correspondente
-              if (valorSelecionado) {
-                document.getElementById(valorSelecionado).style.display =
-                  "flex";
-              }
-            }
-
-            // Exibir a lista de consultas ao carregar a página
-            window.onload = () => {
-              alternarConteudo();
-            };
-          </script>
-          {% else %}
-          <p class="semConsultas" style="font-size: 2rem">
-            Você não solicitou nenhuma consulta.
-          </p>
-          {% endfor %}
-        </ul>
-
-        <ul id="consultas" class="listaPedidos">
-          {% for consulta in consultas %}
-          <li>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#fff"
-            >
-              <path
-                d="M672.31-835q49.84.77 84.92 35.46T792.31-715q0 9.46-1.12 26.42-1.11 16.96-4.11 40.2l-55.77 403Q728.62-222 710.65-208q-17.96 14-41.34 14-16.08 0-28.27-8.85-12.19-8.84-21.35-21.46L501.15-385.69q-4.3-5.54-9.57-8.96-5.27-3.43-12.58-3.43-7.08 0-22.15 14.39L341.31-227.31q-10.16 13.08-23.35 23.19Q304.77-194 288.69-194q-23.38 0-40.84-14.5-17.47-14.5-20.16-37.88l-54.77-402q-3-23.24-4.11-40.2-1.12-16.96-1.12-26.42 0-49.85 35.08-84.92Q237.85-835 287.69-835q29.08 0 49.81 9.5 20.73 9.5 40.73 20.5 20 11 43.65 20.5Q445.54-775 480-775q35.23 0 59.27-9.5 24.04-9.5 44.04-20.5t40.46-20.5q20.46-9.5 48.54-9.5Z"
-              />
-            </svg>
-            <div class="motivoIcon">
-              {{consulta.user_name}}
-              
-            </div>
-
+      <div class="divColumn2">
+        <div class="suasConsultas">
+          <div class="selectCoSo">
             <div class="title">
-              <span class="titleText"> {{ consulta.servico }}</span>
+              <h2 id="consultaTitle">Suas Consultas</h2>
+              <h2 id="solicitacaoTitle">Suas Solicitações</h2>
             </div>
-            <div class="data">
-              <span class="dataText"
-                >{{ consulta.data.strftime('%m/%d %H:%M') }}</span
-              >
-            </div>
-            <div class="buttonBox">
-              <form
-                action="{{ url_for('cancelarConsulta', id=consulta.id) }}"
-                method="POST"
-                style="display: inline"
-              >
-                <button>Cancelar consulta</button>
-              </form>
-            </div>
-          </li>
-          {% else %}
-          <p class="semConsultas" style="font-size: 2rem">
-            Você não tem consultas agendadas.
-          </p>
-          {% endfor %}
-        </ul>
+            <!-- seleção de visualização entre consulta e solicitação -->
+            <select
+              name="consultasSolicitacoesSelect"
+              id="consultasSolicitacoesSelect"
+              onchange="alternarConteudo()"
+            >
+              <option value="consultas" selected>Consultas</option>
+              <option value="solicitacoes">Solicitações</option>
+            </select>
+          </div>
+
+          <div class="listEvents">
+            <ul id="solicitacoes" class="listaPedidos">
+              <!-- retorna toda as solicitações ciando um item de lista para cada solicitação do banco de dados -->
+              {% for solicitacao in solicitacoes %}
+              <li>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="40px"
+                  viewBox="0 -960 960 960"
+                  width="40px"
+                  fill="#fff"
+                >
+                  <path
+                    d="M680-875q66 0 113 47t47 113q0 11-1.5 29.5T834-643l-55 403q-5 40-35.5 63T677-154q-21.67 0-41.5-9.33-19.83-9.34-33.5-28.67L495-348q-2-3.33-6.5-5.17Q484-355 479-355q-2.67 0-16 9L359-195q-14 20.67-34.83 30.83Q303.33-154 281-154q-36 0-66-23.17-30-23.16-35-63.83l-54-402q-3-24-4.5-42.5T120-715q0-66 47-113t113-47q36 0 57.5 9.5T379-845q20 11 42.5 20.5T480-815q36 0 58.5-9.5T581-845q20-11 42-20.5t57-9.5Z"
+                  />
+                </svg>
+                <div class="motivoIcon">
+                  <i class="bx bx-info-circle"></i>
+                  <div class="motivoHover">
+                    <h2>Motivo:</h2>
+                    <span>
+                      <!-- mostra o motivo de consulta (no ícone, basta passar o mouse em cima) -->
+                      {{solicitacao.motivo}}
+                    </span>
+                  </div>
+                </div>
+                <div class="solicitacaoDetails">
+                  <p>
+                    <!-- mostra o nome do usuário e a data -->
+                    Solicitação de {{ solicitacao.user_name }}: {{
+                    solicitacao.data.strftime('%m/%d %H:%M') }}
+                  </p>
+                  <!-- botão de confirmação, usa a função confirmar da routes -->
+                  <form
+                    action="{{ url_for('confirmar', id=solicitacao.id) }}"
+                    method="POST"
+                    style="display: inline"
+                  >
+                    <button type="submit">Confirmar</button>
+                  </form>
+                  <!-- botão de cancelamento, usa a função cancelar da routes -->
+                  <form
+                    action="{{ url_for('cancelar', id=solicitacao.id) }}"
+                    method="POST"
+                    style="display: inline"
+                  >
+                    <button type="submit">Cancelar</button>
+                  </form>
+                </div>
+              </li>
+              <!-- esse script controla a seleção entre visualizar consultas ou solicitações -->
+              <script>
+                function alternarConteudo() {
+                  const select = document.getElementById(
+                    "consultasSolicitacoesSelect"
+                  );
+                  const valorSelecionado = select.value;
+
+                  // Esconder todas as listas
+                  document.getElementById("consultas").style.display = "none";
+                  document.getElementById("solicitacoes").style.display = "none";
+
+                  // Esconder ambos os títulos
+                  const consultaTitle = document.getElementById("consultaTitle");
+                  const solicitacaoTitle =
+                    document.getElementById("solicitacaoTitle");
+                  consultaTitle.style.display = "none";
+                  solicitacaoTitle.style.display = "none";
+
+                  // Mostrar o título e a lista correspondente
+                  if (valorSelecionado === "consultas") {
+                    consultaTitle.style.display = "flex";
+                  } else if (valorSelecionado === "solicitacoes") {
+                    solicitacaoTitle.style.display = "flex";
+                  }
+
+                  // Mostrar a lista correspondente
+                  if (valorSelecionado) {
+                    document.getElementById(valorSelecionado).style.display =
+                      "flex";
+                  }
+                }
+
+                // Exibir a lista de consultas ao carregar a página
+                window.onload = () => {
+                  alternarConteudo();
+                };
+              </script>
+              <script>
+                // Ativar o Select2 no campo
+                $(document).ready(function() {
+                    $('.select2').select2({
+                        placeholder: "Selecione um usuário",
+                        allowClear: true
+                    });
+                });
+              </script>
+              {% else %}
+              <!-- se não houver consultas retorna a mensagem de que não há solicitações de consultas -->
+              <p class="semConsultas" style="font-size: 2rem">
+                Não há solicitações.
+              </p>
+              {% endfor %}
+            </ul>
+
+            <ul id="consultas" class="listaPedidos">
+              <!-- retorna toda as consultas ciando um item de lista para cada consulta do banco de dados -->
+              {% for consulta in consultas %}
+              <li>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#fff"
+                >
+                  <path
+                    d="M672.31-835q49.84.77 84.92 35.46T792.31-715q0 9.46-1.12 26.42-1.11 16.96-4.11 40.2l-55.77 403Q728.62-222 710.65-208q-17.96 14-41.34 14-16.08 0-28.27-8.85-12.19-8.84-21.35-21.46L501.15-385.69q-4.3-5.54-9.57-8.96-5.27-3.43-12.58-3.43-7.08 0-22.15 14.39L341.31-227.31q-10.16 13.08-23.35 23.19Q304.77-194 288.69-194q-23.38 0-40.84-14.5-17.47-14.5-20.16-37.88l-54.77-402q-3-23.24-4.11-40.2-1.12-16.96-1.12-26.42 0-49.85 35.08-84.92Q237.85-835 287.69-835q29.08 0 49.81 9.5 20.73 9.5 40.73 20.5 20 11 43.65 20.5Q445.54-775 480-775q35.23 0 59.27-9.5 24.04-9.5 44.04-20.5t40.46-20.5q20.46-9.5 48.54-9.5Z"
+                  />
+                </svg>
+                <div class="motivoIcon">
+                  <!-- mostra o nome do cliente da consulta -->
+                  {{consulta.user_name}}
+                  
+                </div>
+
+                <div class="title">
+                  <span class="titleText"> 
+                    <!-- mostra o serviço desejado -->
+                    {{ consulta.servico }}</span>
+                </div>
+                <div class="data">
+                  <span class="dataText"
+                    >
+                    <!-- mostra a data da consulta editando no formato mês e dia -->
+                    {{ consulta.data.strftime('%m/%d %H:%M') }}</span
+                  >
+                </div>
+                <div class="buttonBox">
+                  <!-- botão de cancelar puxando a função cancelarConsulta da routes.py -->
+                  <form
+                    action="{{ url_for('cancelarConsulta', id=consulta.id) }}"
+                    method="POST"
+                    style="display: inline"
+                  >
+                    <button>Cancelar consulta</button>
+                  </form>
+                </div>
+              </li>
+              {% else %}
+              <p class="semConsultas" style="font-size: 2rem">
+                Você não tem consultas agendadas.
+              </p>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
+      <!-- esse script controla a seleção entre visualizar consultas ou solicitações -->
+      <script>
+        function alternarConteudo() {
+          const select = document.getElementById("consultasSolicitacoesSelect");
+          const valorSelecionado = select.value;
+
+          // Esconder todas as listas
+          document.getElementById("consultas").style.display = "none";
+          document.getElementById("solicitacoes").style.display = "none";
+
+          // Esconder ambos os títulos
+          const consultaTitle = document.getElementById("consultaTitle");
+          const solicitacaoTitle = document.getElementById("solicitacaoTitle");
+          consultaTitle.style.display = "none";
+          solicitacaoTitle.style.display = "none";
+
+          // Mostrar o título e a lista correspondente
+          if (valorSelecionado === "consultas") {
+            consultaTitle.style.display = "flex";
+          } else if (valorSelecionado === "solicitacoes") {
+            solicitacaoTitle.style.display = "flex";
+          }
+
+          // Mostrar a lista correspondente
+          if (valorSelecionado) {
+            document.getElementById(valorSelecionado).style.display = "flex";
+          }
+        }
+
+        // Exibir a lista de consultas ao carregar a página
+        window.onload = () => {
+          alternarConteudo();
+        };
+      </script>
+      <!-- esse scritp ativa o select para escolher o usuário que desejamos adicionar uma consulta, adicionando uma opção para cada usuário -->
+      <script>
+        // Ativar o Select2 no campo
+        $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: "Selecione um usuário",
+                allowClear: true
+            });
+        });
+      </script>
+      <!-- SE O USUÁRIO NÃO FOR UM ADM ELE RETORNA A HOMEPAGE DE USUÁRIO COMUM -->
+    {%else%}
+      <div class="column">
+        <div class="divOla">
+          <div class="ola">
+            <!-- pega o nome do usuário atual -->
+            <h3>Olá, {{ current_user.username.capitalize() }}!</h3>
+            <p>Seja bem-vindo!</p>
+          </div>
+          <img src="{{ url_for('static', filename='imgs/ola.png') }}" alt="" />
+        </div>
+
+        <div class="suasConsultas">
+          <div class="selectCoSo">
+            <div class="title">
+              <h2 id="consultaTitle">Suas Consultas</h2>
+              <h2 id="solicitacaoTitle">Suas Solicitações</h2>
+            </div>
+            <select
+              name="consultasSolicitacoesSelect"
+              id="consultasSolicitacoesSelect"
+              onchange="alternarConteudo()"
+            >
+              <option value="consultas" selected>Consultas</option>
+              <option value="solicitacoes">Solicitações</option>
+            </select>
+          </div>
+
+          <div class="listEvents">
+            <ul id="solicitacoes" class="listaPedidos">
+              {% for solicitacao in solicitacoes %}
+              <li>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#fff"
+                >
+                  <path
+                    d="M672.31-835q49.84.77 84.92 35.46T792.31-715q0 9.46-1.12 26.42-1.11 16.96-4.11 40.2l-55.77 403Q728.62-222 710.65-208q-17.96 14-41.34 14-16.08 0-28.27-8.85-12.19-8.84-21.35-21.46L501.15-385.69q-4.3-5.54-9.57-8.96-5.27-3.43-12.58-3.43-7.08 0-22.15 14.39L341.31-227.31q-10.16 13.08-23.35 23.19Q304.77-194 288.69-194q-23.38 0-40.84-14.5-17.47-14.5-20.16-37.88l-54.77-402q-3-23.24-4.11-40.2-1.12-16.96-1.12-26.42 0-49.85 35.08-84.92Q237.85-835 287.69-835q29.08 0 49.81 9.5 20.73 9.5 40.73 20.5 20 11 43.65 20.5Q445.54-775 480-775q35.23 0 59.27-9.5 24.04-9.5 44.04-20.5t40.46-20.5q20.46-9.5 48.54-9.5Z"
+                  />
+                </svg>
+                <div class="motivoIcon">
+                  <i class="bx bx-info-circle"></i>
+                  <div class="motivoHover">
+                    <h2>Motivo:</h2>
+                    <span>{{solicitacao.motivo}}</span>
+                  </div>
+                </div>
+                <div class="title">
+                  <span class="titleText">{{ solicitacao.servico }}</span>
+                </div>
+                <div class="data">
+                  <span class="dataText"
+                    >{{ solicitacao.data.strftime('%m/%d %H:%M') }}</span
+                  >
+                </div>
+                <div class="buttonBox">
+                  <form
+                    action="{{ url_for('cancelarSolicitacao', id=solicitacao.id) }}"
+                    method="POST"
+                    style="display: inline"
+                  >
+                    <button>Cancelar Solicitação</button>
+                  </form>
+                </div>
+              </li>
+              {% else %}
+              <p class="semConsultas" style="font-size: 2rem">
+                Você não solicitou nenhuma consulta.
+              </p>
+              {% endfor %}
+            </ul>
+
+            <ul id="consultas" class="listaPedidos">
+              {% for consulta in consultasPorUsuario %}
+              <li>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="#fff"
+                >
+                  <path
+                    d="M672.31-835q49.84.77 84.92 35.46T792.31-715q0 9.46-1.12 26.42-1.11 16.96-4.11 40.2l-55.77 403Q728.62-222 710.65-208q-17.96 14-41.34 14-16.08 0-28.27-8.85-12.19-8.84-21.35-21.46L501.15-385.69q-4.3-5.54-9.57-8.96-5.27-3.43-12.58-3.43-7.08 0-22.15 14.39L341.31-227.31q-10.16 13.08-23.35 23.19Q304.77-194 288.69-194q-23.38 0-40.84-14.5-17.47-14.5-20.16-37.88l-54.77-402q-3-23.24-4.11-40.2-1.12-16.96-1.12-26.42 0-49.85 35.08-84.92Q237.85-835 287.69-835q29.08 0 49.81 9.5 20.73 9.5 40.73 20.5 20 11 43.65 20.5Q445.54-775 480-775q35.23 0 59.27-9.5 24.04-9.5 44.04-20.5t40.46-20.5q20.46-9.5 48.54-9.5Z"
+                  />
+                </svg>
+                <div class="motivoIcon">
+                  <i class="bx bx-info-circle"></i>
+                  <div class="motivoHover">
+                    <h2>Motivo:</h2>
+                    <span>{{consulta.motivo}}</span>
+                  </div>
+                </div>
+
+                <div class="title">
+                  <span class="titleText"> {{ consulta.servico }}</span>
+                </div>
+                <div class="data">
+                  <span class="dataText"
+                    >{{ consulta.data.strftime('%m/%d %H:%M') }}</span
+                  >
+                </div>
+                <div class="buttonBox">
+                  <form
+                    action="{{ url_for('cancelarConsulta', id=consulta.id) }}"
+                    method="POST"
+                    style="display: inline"
+                  >
+                    <button>Cancelar consulta</button>
+                  </form>
+                </div>
+              </li>
+              {% else %}
+              <p class="semConsultas" style="font-size: 2rem">
+                Você não tem consultas agendadas.
+              </p>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        function alternarConteudo() {
+          const select = document.getElementById("consultasSolicitacoesSelect");
+          const valorSelecionado = select.value;
+
+          // Esconder todas as listas
+          document.getElementById("consultas").style.display = "none";
+          document.getElementById("solicitacoes").style.display = "none";
+
+          // Esconder ambos os títulos
+          const consultaTitle = document.getElementById("consultaTitle");
+          const solicitacaoTitle = document.getElementById("solicitacaoTitle");
+          consultaTitle.style.display = "none";
+          solicitacaoTitle.style.display = "none";
+
+          // Mostrar o título e a lista correspondente
+          if (valorSelecionado === "consultas") {
+            consultaTitle.style.display = "flex";
+          } else if (valorSelecionado === "solicitacoes") {
+            solicitacaoTitle.style.display = "flex";
+          }
+
+          // Mostrar a lista correspondente
+          if (valorSelecionado) {
+            document.getElementById(valorSelecionado).style.display = "flex";
+          }
+        }
+
+        // Exibir a lista de consultas ao carregar a página
+        window.onload = () => {
+          alternarConteudo();
+        };
+      </script>
+
+      <div class="column">
+        <div class="requisitarConsulta">
+          <h2>Solicitar consulta</h2>
+          <form action="{{url_for('homepage')}}" id="consultaForm" method="POST">
+            {{ form_solicitacao.hidden_tag() }}
+            <h3>Qual serviço você deseja agendar?</h3>
+            <div class="divInput">
+              {{ form_solicitacao.servico(type="text", id="servico",
+              placeholder="Serviço...") }}
+            </div>
+            <h3>Descreva o motivo de sua consulta:</h3>
+            <div class="divInput">
+              {{ form_solicitacao.motivo(type="text", id="motivo",
+              placeholder="Descreva o motivo...") }}
+            </div>
+            <h3>Dia e horário da consulta:</h3>
+            <div class="divInput">
+              {{ form_solicitacao.data(type="datetime-local", id="data",
+              placeholder='Clique para escolher uma data...') }}
+            </div>
+            {{ form_solicitacao.submit(class="submitSolicitacao") }}
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </main>
   <script>
-    function alternarConteudo() {
-      const select = document.getElementById("consultasSolicitacoesSelect");
-      const valorSelecionado = select.value;
-
-      // Esconder todas as listas
-      document.getElementById("consultas").style.display = "none";
-      document.getElementById("solicitacoes").style.display = "none";
-
-      // Esconder ambos os títulos
-      const consultaTitle = document.getElementById("consultaTitle");
-      const solicitacaoTitle = document.getElementById("solicitacaoTitle");
-      consultaTitle.style.display = "none";
-      solicitacaoTitle.style.display = "none";
-
-      // Mostrar o título e a lista correspondente
-      if (valorSelecionado === "consultas") {
-        consultaTitle.style.display = "flex";
-      } else if (valorSelecionado === "solicitacoes") {
-        solicitacaoTitle.style.display = "flex";
-      }
-
-      // Mostrar a lista correspondente
-      if (valorSelecionado) {
-        document.getElementById(valorSelecionado).style.display = "flex";
-      }
-    }
-
-    // Exibir a lista de consultas ao carregar a página
-    window.onload = () => {
-      alternarConteudo();
-    };
+    document.addEventListener("DOMContentLoaded", function () {
+      var calendarEl = document.getElementById("calendar");
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        locale: "pt-br",
+        events: [
+          {% for consulta in consultas %}
+            { title: "{{ consulta.title }}", start: "{{ consulta.data }}" },
+          {% endfor %}
+        ]
+      });
+      calendar.render();
+    });
   </script>
+  
   <script>
-    // Ativar o Select2 no campo
-    $(document).ready(function() {
-        $('.select2').select2({
-            placeholder: "Selecione um usuário",
-            allowClear: true
+    document.addEventListener('DOMContentLoaded', function() {
+        const datasAgendadas = {{ datas_agendadas | tojson }};
+        flatpickr("[name='data']", {
+            enableTime: true,
+            dateFormat: "Y-m-d\\TH:i",
+            disable: datasAgendadas.map(data => {
+                const [date, time] = data.split(' ');
+                return {
+                    from: new Date(`${date}T${time}`),
+                    to: new Date(`${date}T${time}`)
+                };
+            })
         });
     });
   </script>
-  {%else%}
-
-  <div class="column">
-    <div class="divOla">
-      <div class="ola">
-        <h3>Olá, {{ current_user.username.capitalize() }}!</h3>
-        <p>Seja bem-vindo!</p>
-      </div>
-      <img src="{{ url_for('static', filename='imgs/ola.png') }}" alt="" />
-    </div>
-
-    <div class="suasConsultas">
-      <div class="selectCoSo">
-        <div class="title">
-          <h2 id="consultaTitle">Suas Consultas</h2>
-          <h2 id="solicitacaoTitle">Suas Solicitações</h2>
-        </div>
-        <select
-          name="consultasSolicitacoesSelect"
-          id="consultasSolicitacoesSelect"
-          onchange="alternarConteudo()"
-        >
-          <option value="consultas" selected>Consultas</option>
-          <option value="solicitacoes">Solicitações</option>
-        </select>
-      </div>
-
-      <div class="listEvents">
-        <ul id="solicitacoes" class="listaPedidos">
-          {% for solicitacao in solicitacoes %}
-          <li>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#fff"
-            >
-              <path
-                d="M672.31-835q49.84.77 84.92 35.46T792.31-715q0 9.46-1.12 26.42-1.11 16.96-4.11 40.2l-55.77 403Q728.62-222 710.65-208q-17.96 14-41.34 14-16.08 0-28.27-8.85-12.19-8.84-21.35-21.46L501.15-385.69q-4.3-5.54-9.57-8.96-5.27-3.43-12.58-3.43-7.08 0-22.15 14.39L341.31-227.31q-10.16 13.08-23.35 23.19Q304.77-194 288.69-194q-23.38 0-40.84-14.5-17.47-14.5-20.16-37.88l-54.77-402q-3-23.24-4.11-40.2-1.12-16.96-1.12-26.42 0-49.85 35.08-84.92Q237.85-835 287.69-835q29.08 0 49.81 9.5 20.73 9.5 40.73 20.5 20 11 43.65 20.5Q445.54-775 480-775q35.23 0 59.27-9.5 24.04-9.5 44.04-20.5t40.46-20.5q20.46-9.5 48.54-9.5Z"
-              />
-            </svg>
-            <div class="motivoIcon">
-              <i class="bx bx-info-circle"></i>
-              <div class="motivoHover">
-                <h2>Motivo:</h2>
-                <span>{{solicitacao.motivo}}</span>
-              </div>
-            </div>
-            <div class="title">
-              <span class="titleText">{{ solicitacao.servico }}</span>
-            </div>
-            <div class="data">
-              <span class="dataText"
-                >{{ solicitacao.data.strftime('%m/%d %H:%M') }}</span
-              >
-            </div>
-            <div class="buttonBox">
-              <form
-                action="{{ url_for('cancelarSolicitacao', id=solicitacao.id) }}"
-                method="POST"
-                style="display: inline"
-              >
-                <button>Cancelar Solicitação</button>
-              </form>
-            </div>
-          </li>
-          {% else %}
-          <p class="semConsultas" style="font-size: 2rem">
-            Você não solicitou nenhuma consulta.
-          </p>
-          {% endfor %}
-        </ul>
-
-        <ul id="consultas" class="listaPedidos">
-          {% for consulta in consultasPorUsuario %}
-          <li>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#fff"
-            >
-              <path
-                d="M672.31-835q49.84.77 84.92 35.46T792.31-715q0 9.46-1.12 26.42-1.11 16.96-4.11 40.2l-55.77 403Q728.62-222 710.65-208q-17.96 14-41.34 14-16.08 0-28.27-8.85-12.19-8.84-21.35-21.46L501.15-385.69q-4.3-5.54-9.57-8.96-5.27-3.43-12.58-3.43-7.08 0-22.15 14.39L341.31-227.31q-10.16 13.08-23.35 23.19Q304.77-194 288.69-194q-23.38 0-40.84-14.5-17.47-14.5-20.16-37.88l-54.77-402q-3-23.24-4.11-40.2-1.12-16.96-1.12-26.42 0-49.85 35.08-84.92Q237.85-835 287.69-835q29.08 0 49.81 9.5 20.73 9.5 40.73 20.5 20 11 43.65 20.5Q445.54-775 480-775q35.23 0 59.27-9.5 24.04-9.5 44.04-20.5t40.46-20.5q20.46-9.5 48.54-9.5Z"
-              />
-            </svg>
-            <div class="motivoIcon">
-              <i class="bx bx-info-circle"></i>
-              <div class="motivoHover">
-                <h2>Motivo:</h2>
-                <span>{{consulta.motivo}}</span>
-              </div>
-            </div>
-
-            <div class="title">
-              <span class="titleText"> {{ consulta.servico }}</span>
-            </div>
-            <div class="data">
-              <span class="dataText"
-                >{{ consulta.data.strftime('%m/%d %H:%M') }}</span
-              >
-            </div>
-            <div class="buttonBox">
-              <form
-                action="{{ url_for('cancelarConsulta', id=consulta.id) }}"
-                method="POST"
-                style="display: inline"
-              >
-                <button>Cancelar consulta</button>
-              </form>
-            </div>
-          </li>
-          {% else %}
-          <p class="semConsultas" style="font-size: 2rem">
-            Você não tem consultas agendadas.
-          </p>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    function alternarConteudo() {
-      const select = document.getElementById("consultasSolicitacoesSelect");
-      const valorSelecionado = select.value;
-
-      // Esconder todas as listas
-      document.getElementById("consultas").style.display = "none";
-      document.getElementById("solicitacoes").style.display = "none";
-
-      // Esconder ambos os títulos
-      const consultaTitle = document.getElementById("consultaTitle");
-      const solicitacaoTitle = document.getElementById("solicitacaoTitle");
-      consultaTitle.style.display = "none";
-      solicitacaoTitle.style.display = "none";
-
-      // Mostrar o título e a lista correspondente
-      if (valorSelecionado === "consultas") {
-        consultaTitle.style.display = "flex";
-      } else if (valorSelecionado === "solicitacoes") {
-        solicitacaoTitle.style.display = "flex";
-      }
-
-      // Mostrar a lista correspondente
-      if (valorSelecionado) {
-        document.getElementById(valorSelecionado).style.display = "flex";
-      }
-    }
-
-    // Exibir a lista de consultas ao carregar a página
-    window.onload = () => {
-      alternarConteudo();
-    };
-  </script>
-
-  <div class="column">
-    <div class="requisitarConsulta">
-      <h2>Solicitar consulta</h2>
-      <form action="{{url_for('homepage')}}" id="consultaForm" method="POST">
-        {{ form_solicitacao.hidden_tag() }}
-        <h3>Qual serviço você deseja agendar?</h3>
-        <div class="divInput">
-          {{ form_solicitacao.servico(type="text", id="servico",
-          placeholder="Serviço...") }}
-        </div>
-        <h3>Descreva o motivo de sua consulta:</h3>
-        <div class="divInput">
-          {{ form_solicitacao.motivo(type="text", id="motivo",
-          placeholder="Descreva o motivo...") }}
-        </div>
-        <h3>Dia e horário da consulta:</h3>
-        <div class="divInput">
-          {{ form_solicitacao.data(type="datetime-local", id="data",
-          placeholder='Clique para escolher uma data...') }}
-        </div>
-        {{ form_solicitacao.submit(class="submitSolicitacao") }}
-      </form>
-    </div>
-  </div>
-  {% endif %}
-</main>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var calendarEl = document.getElementById("calendar");
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: "dayGridMonth",
-      locale: "pt-br",
-      events: [
-        {% for consulta in consultas %}
-          { title: "{{ consulta.title }}", start: "{{ consulta.data }}" },
-        {% endfor %}
-      ]
-    });
-    calendar.render();
-  });
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-      const datasAgendadas = {{ datas_agendadas | tojson }};
-      flatpickr("[name='data']", {
-          enableTime: true,
-          dateFormat: "Y-m-d\\TH:i",
-          disable: datasAgendadas.map(data => {
-              const [date, time] = data.split(' ');
-              return {
-                  from: new Date(`${date}T${time}`),
-                  to: new Date(`${date}T${time}`)
-              };
-          })
-      });
-  });
-</script>
-
-{%else%} {%include 'navbarOut.html'%}
+{%else%}
+ {%include 'navbarOut.html'%}
 
 <main class="home">
   <section class="hero">
@@ -461,4 +505,5 @@
   </section>
 </main>
 
-{%endif%} {%endblock%}
+{%endif%} 
+{%endblock%}

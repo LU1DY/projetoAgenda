@@ -1,4 +1,5 @@
-{% extends 'base.html' %} {% block head %}
+{% extends 'base.html' %} 
+{% block head %}
 <link
   rel="stylesheet"
   href="{{ url_for('static', filename='css/formLogin.css') }}"
@@ -7,7 +8,10 @@
   href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
   rel="stylesheet"
 />
-{% endblock %} {% block body %} {%include 'navbarOut.html'%}
+{% endblock %}
+ {% block body %} 
+ <!-- adiciona a barra de navegação -->
+ {%include 'navbarOut.html'%}
 
 <main>
   <section class="col1">
@@ -16,14 +20,18 @@
       <p>Faça login para continuar.</p>
     </div>
     <form method="POST" action="">
+      <!-- adiciona a tag contra ataque CSRF e outras formas de segurança -->
       {{ form_login.hidden_tag() }}
       <div class="divInput">
+        <!-- input de email -->
         {{ form_login.email(type="email", id="email", placeholder="Seu e-mail...") }}
         <div class="errorJS" id="errorJSEmail"></div>
       </div>
       <div class="divInput">
+        <!-- input de senha -->
         {{ form_login.senha(type="password", id="password", placeholder="Sua senha...") }}
         <div class="errorJS"></div>
+        <!-- essa estrutura percorre os retornos de mensagens que deixamos pelas funções do routes.py e se houver algum erro ou mensagens de sucesso ele retorna -->
         {% with messages = get_flashed_messages(with_categories=True) %} {% if
         messages %} {% for category, message in messages %}
         <div class="errorFlask">
@@ -54,6 +62,7 @@
 
       <div class="submitResquest">
         <div class="requestPassword">
+          <!-- botão para enviar os dados -->
           {{ form_login.btn_submit_login(id="btn_submit_login") }}
         </div>
         <div class="createCount">
@@ -68,6 +77,7 @@
  
   </section>
 </main>
+<!-- adicionamos os arquivos por um url_for, como adicionamos o caminho do arquivo js antes na função login do routes.py, aqui podemos usá-la -->
 <script src="{{ url_for('static', filename='js/' ~ visualizarSenhaLogin.js) }}"></script>
 
 {% endblock %}

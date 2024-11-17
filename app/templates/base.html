@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -89,4 +90,23 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="{{url_for('static', filename='js/logout.js')}}"></script>
+  <script>
+    // Ativar o Select2 no campo
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Selecione um usuário",
+            allowClear: true
+        });
+    });
+  </script>
 </html>
+<!-- ESTE PÁGINA/DOCUMENTO É USADO COMO BASE PARA OUTRAS PÁGINAS, ASSIM NÃO PRECISAMOS FICAR ADICIONANDO TUDO O QUE ESTA AQUI SEMPRE QUE QUISERMOS ADICIONAR OUTRA PÁGINA -->
+<!-- PARA ADICIONAR BASTA USAR O SEGUINTE CÓDIGO NO TOPO DA PÁGINA:  extends 'base.html'   -->
+
+<!-- PARA EDITAR A BASE DEPOIS DE PUXADA PARA OUTROS DOCUMENTOS, BASTA USAR OS BLOCOS DE CÓDIGO, POR EXEMPLO block body endblock para editar o body da página -->
+ <!-- E SE QUISER EDITAR OUTRA PARTE BASTA ADICIONAR OUTRO BLOCO DENTRO DO DOCUMENTO BASE.HTML, COMO O  block head  para editar a head do documento -->
+
+<!-- url_for: é usado para puxar arquivos ou adicionar links
+arquivos: url_for('nome_da_pasta_dos_arquivos', filename='nome_da_outra_pasta_se_houver/nome_do_arquivo.extenção_do_arquivo')
+links: url_for('nome_da_função_que_deseja_adicionar_o_link')
+adiconamos o nome da função pq caso em algum momento o link para aquela função for alterado, não há necessidade de alterar o link html, que seria necessário caso adicionessemos o link da página diretamente -->

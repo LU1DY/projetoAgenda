@@ -1,4 +1,6 @@
-{% extends 'base.html' %} {%block head%}
+{% extends 'base.html' %} 
+<!-- extends 'base.html' puxa todo o documento html da base.html, assim não precisamos ficar criando todo o documento de uma página para cada página que desejamos criar  -->
+{%block head%}
 <link
   rel="stylesheet"
   href="{{url_for('static', filename='css/formCriarConta.css')}}"
@@ -8,7 +10,9 @@
   rel="stylesheet"
 />
 
-{%endblock%} {%block body%}  {%include 'navbarOut.html'%}
+{%endblock%} {%block body%}
+ <!-- adiciona a barra de navegação -->
+  {%include 'navbarOut.html'%}
 <main>
   <section class="col1">
     <div class="header">
@@ -16,16 +20,20 @@
       <p>Comece agora, cadastre-se abaixo!</p>
     </div>
     <form method="POST" action="{{ url_for('criarconta') }}">
+      <!-- adiciona a tag contra ataque CSRF e outras formas de segurança -->
       {{ form_criar_conta.hidden_tag() }}
       <div class="row">
         <div class="divInput">
+          <!-- input de nome -->
           {{ form_criar_conta.username(type="text", id="username",
           placeholder="Seu nome...") }}
           <div class="errorJS"></div>
         </div>
         <div class="divInput">
+          <!-- input de e-mail -->
           {{ form_criar_conta.email(type="email", id="email", placeholder="Seu e-mail...") }}
           <div class="errorJS"></div>
+          <!-- se caso o email informado já tiver sido criado essa estrutura retorna uma mensagem dizendo que o e-mail já foi cadastrado -->
           {% for error in form_criar_conta.email.errors %}
           <div id="errorFlask">
             <svg
@@ -45,6 +53,7 @@
         </div>
       </div>
       <div class="divInput">
+        <!-- input de senha -->
         {{ form_criar_conta.senha( type="password", id="password",
         placeholder="Sua senha...") }}
         <div class="errorJS"></div>
@@ -78,6 +87,7 @@
         </div>
       </div>
       <div class="divInput">
+        <!-- input de confirmação de senha -->
         {{ form_criar_conta.confirmacao( type="password", id="confirmPassword",
         placeholder="Confirme sua senha...") }}
         <div class="errorJS"></div>
@@ -92,6 +102,7 @@
       </div>
       <div class="submitResquest">
         <div class="requestPassword">
+          <!-- botão para criar conta -->
           {{
           form_criar_conta.btn_submit_criar_conta(id="btn_submit_criar_conta")
           }}
@@ -99,6 +110,7 @@
         <div class="createCount">
           <h4>
             Já possui conta?
+            <!-- rota para fazer login -->
             <a href="{{ url_for('login') }}">Entre por aqui</a>
           </h4>
         </div>
@@ -107,6 +119,7 @@
    
   </section>
 </main>
+<!-- adicionamos os arquivos por um url_for, como adicionamos o caminho do arquivo js antes na função criarconta do routes.py, aqui podemos usá-la -->
 <script src="{{ url_for('static', filename='js/' ~ visualizarSenhaCriarConta.js) }}"></script>
 
 {%endblock%}

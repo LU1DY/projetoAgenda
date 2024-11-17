@@ -1,3 +1,6 @@
+<!-- ESSA NAVBAR É RETORNASA QUANDO O USUÁRIO ESTA LOGADO -->
+
+
 <header class="container-header">
   <div class="logoHeader">
     <svg
@@ -30,7 +33,11 @@
       </svg>
     </div>
     <ul>
-      {% if current_user.is_authenticated %} {% if current_user.is_admin %}
+      <!-- verifica se o usuário esta logado -->
+      {% if current_user.is_authenticated %} 
+      <!-- verifica se o usuário é um administrador -->
+      {% if current_user.is_admin %}
+      <!-- se for um ADM retorna botões com as rotas para o painel administrativo -->
       <li>
         <a href="{{url_for('admin')}}">
           <i class="bi bi-database"></i>
@@ -40,6 +47,7 @@
         <a href="{{url_for('homepage')}}"><i class="bx bx-home-alt-2"></i></a>
       </li>
       {%else%}
+      <!-- se não for um ADM retorna apenas o botão da homepage homepage -->
       <li>
         <a href="{{url_for('homepage')}}">
           <i class="bi bi-house"></i>
@@ -67,7 +75,9 @@
 
     <div id="perfil">
       <ul>
+        <!-- verifica se o usuário esta logado-->
         {% if current_user.is_authenticated %}
+        <!--  se sim ele terá acesso a fução de logout -->
         <li id="logout">
           <i class="bi bi-door-open"></i>
         </li>
